@@ -6,7 +6,7 @@ async function loadPlayers() {
   const response = await fetch('PlayerList.json');
   playersData = await response.json();
 
-  // Danish names can be shown correctly
+  // Danish names will be shown correctly
   renderPlayers(playersData);
 }
 
@@ -30,28 +30,31 @@ function renderPlayers(players) {
   });
 }
 
-// Group assignment helper
-// ==========================
-// CHANGES HERE for fairer team splits!
+// Fair team assignment: evenly distribute skill
 function assignPlayersToTeams(selectedPlayers, numTeams) {
-  // Sort by skill (descending) to balance by skill across teams
+  // Sort by skill (descending)
   selectedPlayers.sort((a, b) => b.skill - a.skill);
 
-  // Initialize teams
-  let teams = Array.from({length: numTeams}, () => []);
+  // Initialize empty teams
+  let teams = Array.from({ length: numTeams }, () => []);
 
-  // Distribute in round-robin order (avoids snake draft problem)
+  // Distribute in round-robin (snake can be better, but round-robin is OK for now)
   selectedPlayers.forEach((player, idx) => {
     teams[idx % numTeams].push(player);
   });
 
-  // Shuffle each team internally for randomness
-  const shuffle = arr => arr.sort(() => Math.random() - 0.5);
+  // Shuffle inside each team for randomness
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
   teams = teams.map(shuffle);
 
   return teams;
 }
-// ==========================
 
 document.addEventListener('DOMContentLoaded', () => {
   loadPlayers();
@@ -62,12 +65,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // Find selected players
     const checked = Array.from(document.querySelectorAll("#players input[type=checkbox]:checked"));
     const selectedIds = checked.map(c => Number(c.value));
+
+    // LOG: See which IDs are checked
+    console.log("Checked IDs:", selectedIds);
+
+    // Only use ID lookup to get selected player objects
     const selectedPlayers = playersData.filter(p => selectedIds.includes(p.id));
+    console.log("Selected players:", selectedPlayers.map(x => x.name));
 
-    const numTeams = Math.max(2, Math.min(6, parseInt(document.getElementById('numTeams').value, 10)));
+    const numTeamsField = document.getElementById('numTeams');
+    let numTeams = parseInt(numTeamsField.value, 10);
+    // Clamp value to safe boundaries
+    if (isNaN(numTeams) || numTeams < 2) numTeams = 2;
+    if (numTeams > 6) numTeams = 6;
 
+    // If not enough players for number of teams
     if (selectedPlayers.length < numTeams) {
-      document.getElementById('teamsResult').innerHTML = "<p>For fÃ¥ spillere til antallet af hold.</p>";
+      document.getElementById('teamsResult').innerHTML = "<p>For få spillere til antallet af hold.</p>";
       return;
     }
 
@@ -76,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let html = "";
     teams.forEach((team, idx) => {
-      html += `<div class="team-block"><h3>Hold ${idx+1}</h3><ul>`;
+      html += `<div class="team-block"><h3>Hold ${idx + 1}</h3><ul>`;
       team.forEach(player => {
         html += `<li>${player.name} (niveau: ${player.skill})</li>`;
       });
