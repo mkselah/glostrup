@@ -1,3 +1,4 @@
+// app.js
 // Fetch & display players and handle logic
 
 let playersData = [];
@@ -6,7 +7,6 @@ async function loadPlayers() {
   const response = await fetch('PlayerList.json');
   playersData = await response.json();
 
-  // Danish names will be shown correctly
   renderPlayers(playersData);
 }
 
@@ -16,16 +16,30 @@ function renderPlayers(players) {
 
   players.forEach(player => {
     const id = "player_" + player.id;
+
+    // NEW: Wrap everything in one <label> for robustness
     const label = document.createElement("label");
-    label.htmlFor = id;
+    label.htmlFor = id; // explicit (optional if input inside label)
+
+    // Make label a block to avoid weird touch events
+    label.style.display = "flex";
+    label.style.alignItems = "center";
+    label.style.marginBottom = "0.6em";
+    label.style.fontSize = "1em";
+    label.style.cursor = "pointer";
 
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.id = id;
     checkbox.value = player.id;
 
+    // Append the checkbox and the text, in one label
     label.appendChild(checkbox);
-    label.appendChild(document.createTextNode(` ${player.name} (niveau: ${player.skill})`));
+
+    // No leading space needed, use unicode nbsp for consistency
+    label.appendChild(document.createTextNode('\u00A0' + player.name + ' (niveau: ' + player.skill + ')'));
+
+    // APPEND to players container
     container.appendChild(label);
   });
 }
@@ -38,7 +52,7 @@ function assignPlayersToTeams(selectedPlayers, numTeams) {
   // Initialize empty teams
   let teams = Array.from({ length: numTeams }, () => []);
 
-  // Distribute in round-robin (snake can be better, but round-robin is OK for now)
+  // Distribute in round-robin
   selectedPlayers.forEach((player, idx) => {
     teams[idx % numTeams].push(player);
   });
@@ -66,12 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const checked = Array.from(document.querySelectorAll("#players input[type=checkbox]:checked"));
     const selectedIds = checked.map(c => Number(c.value));
 
-    // LOG: See which IDs are checked
-    console.log("Checked IDs:", selectedIds);
-
     // Only use ID lookup to get selected player objects
     const selectedPlayers = playersData.filter(p => selectedIds.includes(p.id));
-    console.log("Selected players:", selectedPlayers.map(x => x.name));
 
     const numTeamsField = document.getElementById('numTeams');
     let numTeams = parseInt(numTeamsField.value, 10);
@@ -79,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isNaN(numTeams) || numTeams < 2) numTeams = 2;
     if (numTeams > 6) numTeams = 6;
 
-    // If not enough players for number of teams
     if (selectedPlayers.length < numTeams) {
       document.getElementById('teamsResult').innerHTML = "<p>For få spillere til antallet af hold.</p>";
       return;
