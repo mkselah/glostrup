@@ -41,24 +41,37 @@ function renderPlayers(players) {
   });
 }
 
-// Fair team assignment with size constraint: evenly distribute skill AND keep teams as even-sized as possible
+// Fisher-Yates shuffle for randomness
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Fair team assignment with randomness (every click splits differently!)
 function assignPlayersToTeams(selectedPlayers, numTeams) {
-  // Sort players descending by skill so higher skill assigned first
-  const playersSorted = [...selectedPlayers].sort((a, b) => b.skill - a.skill);
+  // --- KEY CHANGE: shuffle before sort (to randomize tie-breaks) ---
+  const shuffled = shuffle(selectedPlayers);
+
+  // Sort players descending by skill, but random within tie
+  shuffled.sort((a, b) => b.skill - a.skill);
 
   // Calculate base team size & max team size for uneven splits
-  const minTeamSize = Math.floor(playersSorted.length / numTeams);
-  const extra = playersSorted.length % numTeams; // number of teams that get one extra player
+  const minTeamSize = Math.floor(shuffled.length / numTeams);
+  const extra = shuffled.length % numTeams; // number of teams that get one extra player
 
-  // Prepare teams array, where each team has players and track current skill total
+  // Prepare teams array
   let teams = Array.from({ length: numTeams }, (_, i) => ({
     players: [],
     skillSum: 0,
     maxSize: minTeamSize + (i < extra ? 1 : 0)
   }));
 
-  playersSorted.forEach(player => {
-    // Among the teams not yet full, pick the one with the lowest skill sum
+  shuffled.forEach(player => {
+    // For teams not yet full, pick one with lowest skill sum
     let eligibleTeams = teams.filter(team => team.players.length < team.maxSize);
     let lowestTeam = eligibleTeams.reduce((minTeam, team) => {
       return (team.skillSum < minTeam.skillSum) ? team : minTeam;
@@ -68,15 +81,7 @@ function assignPlayersToTeams(selectedPlayers, numTeams) {
     lowestTeam.skillSum += player.skill;
   });
 
-  // Shuffle each team for randomness
-  function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
-
+  // Shuffle each team for internal randomness
   return teams.map(team => shuffle(team.players));
 }
 
