@@ -1,0 +1,12 @@
+[
+  { "id": 1, "name": "Oscar Jensen", "skill": 2 },
+  { "id": 2, "name": "Emil Pedersen", "skill": 3 },
+  { "id": 3, "name": "Victor Sørensen", "skill": 1 },
+  { "id": 4, "name": "Lucas Madsen", "skill": 2 },
+  { "id": 5, "name": "William Hansen", "skill": 3 },
+  { "id": 6, "name": "Noah Nielsen", "skill": 1 },
+  { "id": 7, "name": "Oliver Jensen", "skill": 2 },
+  { "id": 8, "name": "Liam Sørensen", "skill": 1 },
+  { "id": 9, "name": "Milo Pedersen", "skill": 3 },
+  { "id": 10, "name": "Elias Madsen", "skill": 2 }
+]
