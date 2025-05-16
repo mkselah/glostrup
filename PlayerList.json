@@ -30,7 +30,7 @@
   { "id": 29, "name": "Philip Johansen", "skill": 3 },
   { "id": 30, "name": "Sander", "skill": 3 },
   { "id": 31, "name": "Sebastian", "skill": 1 },
-  { "id": 31, "name": "Storm", "skill": 1 },
-  { "id": 31, "name": "Sylvester", "skill": 2 },
-  { "id": 31, "name": "Yakup", "skill": 1 }
+  { "id": 32, "name": "Storm", "skill": 1 },
+  { "id": 33, "name": "Sylvester", "skill": 2 },
+  { "id": 34, "name": "Yakup", "skill": 1 }
 ]
