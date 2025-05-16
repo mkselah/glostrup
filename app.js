@@ -6,7 +6,6 @@ let playersData = [];
 async function loadPlayers() {
   const response = await fetch('PlayerList.json');
   playersData = await response.json();
-
   renderPlayers(playersData);
 }
 
@@ -17,11 +16,10 @@ function renderPlayers(players) {
   players.forEach(player => {
     const id = "player_" + player.id;
 
-    // NEW: Wrap everything in one <label> for robustness
+    // Wrap everything in one <label> for robustness
     const label = document.createElement("label");
-    label.htmlFor = id; // explicit (optional if input inside label)
+    label.htmlFor = id;
 
-    // Make label a block to avoid weird touch events
     label.style.display = "flex";
     label.style.alignItems = "center";
     label.style.marginBottom = "0.6em";
@@ -33,41 +31,44 @@ function renderPlayers(players) {
     checkbox.id = id;
     checkbox.value = player.id;
 
-    // Append the checkbox and the text, in one label
     label.appendChild(checkbox);
 
-    // No leading space needed, use unicode nbsp for consistency
-    label.appendChild(document.createTextNode('\u00A0' + player.name + ' (niveau: ' + player.skill + ')'));
+    label.appendChild(
+      document.createTextNode('\u00A0' + player.name + ' (niveau: ' + player.skill + ')')
+    );
 
-    // APPEND to players container
     container.appendChild(label);
   });
 }
 
-// Fair team assignment: evenly distribute skill
+// Fair team assignment with size constraint: evenly distribute skill AND keep teams as even-sized as possible
 function assignPlayersToTeams(selectedPlayers, numTeams) {
-  // Sort by skill (descending)
-  selectedPlayers.sort((a, b) => a.skill - b.skill);
+  // Sort players descending by skill so higher skill assigned first
+  const playersSorted = [...selectedPlayers].sort((a, b) => b.skill - a.skill);
 
-  // Initialize empty teams
-  let teams = Array.from({ length: numTeams }, () => []);
+  // Calculate base team size & max team size for uneven splits
+  const minTeamSize = Math.floor(playersSorted.length / numTeams);
+  const extra = playersSorted.length % numTeams; // number of teams that get one extra player
 
-// Greedy assign: put player onto team with lowest total skill
-selectedPlayers.forEach(player => {
-  // Find team with the lowest sum of skills
-  let lowestTeam = teams.reduce((minTeam, team, idx) => {
-    const teamSkill = team.reduce((s, p) => s + p.skill, 0);
-    if (teamSkill < minTeam.skill) {
-      return { idx, skill: teamSkill };
-    } else {
-      return minTeam;
-    }
-  }, { idx: 0, skill: Infinity }).idx;
+  // Prepare teams array, where each team has players and track current skill total
+  let teams = Array.from({ length: numTeams }, (_, i) => ({
+    players: [],
+    skillSum: 0,
+    maxSize: minTeamSize + (i < extra ? 1 : 0)
+  }));
 
-  teams[lowestTeam].push(player);
-});
+  playersSorted.forEach(player => {
+    // Among the teams not yet full, pick the one with the lowest skill sum
+    let eligibleTeams = teams.filter(team => team.players.length < team.maxSize);
+    let lowestTeam = eligibleTeams.reduce((minTeam, team) => {
+      return (team.skillSum < minTeam.skillSum) ? team : minTeam;
+    }, eligibleTeams[0]);
 
-  // Shuffle inside each team for randomness
+    lowestTeam.players.push(player);
+    lowestTeam.skillSum += player.skill;
+  });
+
+  // Shuffle each team for randomness
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -75,27 +76,21 @@ selectedPlayers.forEach(player => {
     }
     return arr;
   }
-  teams = teams.map(shuffle);
 
-  return teams;
+  return teams.map(team => shuffle(team.players));
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   loadPlayers();
-
   document.getElementById('trainingForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    // Find selected players
     const checked = Array.from(document.querySelectorAll("#players input[type=checkbox]:checked"));
     const selectedIds = checked.map(c => Number(c.value));
-
-    // Only use ID lookup to get selected player objects
     const selectedPlayers = playersData.filter(p => selectedIds.includes(p.id));
 
     const numTeamsField = document.getElementById('numTeams');
     let numTeams = parseInt(numTeamsField.value, 10);
-    // Clamp value to safe boundaries
     if (isNaN(numTeams) || numTeams < 2) numTeams = 2;
     if (numTeams > 6) numTeams = 6;
 
@@ -104,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Assign & show teams
     const teams = assignPlayersToTeams(selectedPlayers, numTeams);
 
     let html = "";
