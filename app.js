@@ -52,10 +52,20 @@ function assignPlayersToTeams(selectedPlayers, numTeams) {
   // Initialize empty teams
   let teams = Array.from({ length: numTeams }, () => []);
 
-  // Distribute in round-robin
-  selectedPlayers.forEach((player, idx) => {
-    teams[idx % numTeams].push(player);
-  });
+// Greedy assign: put player onto team with lowest total skill
+selectedPlayers.forEach(player => {
+  // Find team with the lowest sum of skills
+  let lowestTeam = teams.reduce((minTeam, team, idx) => {
+    const teamSkill = team.reduce((s, p) => s + p.skill, 0);
+    if (teamSkill < minTeam.skill) {
+      return { idx, skill: teamSkill };
+    } else {
+      return minTeam;
+    }
+  }, { idx: 0, skill: Infinity }).idx;
+
+  teams[lowestTeam].push(player);
+});
 
   // Shuffle inside each team for randomness
   function shuffle(arr) {
