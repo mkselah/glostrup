@@ -1,0 +1,63 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f8f8fb;
+  margin: 0;
+  padding: 0;
+}
+
+main {
+  max-width: 500px;
+  margin: 1em auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px #ccc;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.players-list {
+  margin-bottom: 1em;
+}
+
+#players label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.6em;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+input[type="number"], button {
+  width: 100%;
+  font-size: 1em;
+  padding: 8px;
+  margin-bottom: 1em;
+}
+
+button {
+  background: #22a36c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #18824f;
+}
+
+#teamsResult {
+  margin-top: 1em;
+}
+
+.team-block {
+  background: #f2f4f7;
+  border-radius: 6px;
+  margin-bottom: 1em;
+  padding: 0.6em;
+}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Glostrup FC Træning</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Glostrup FC - Træning</h1>
+    <form id="trainingForm">
+      <section class="players-list">
+        <h2>Spillere til stede:</h2>
+        <div id="players"></div>
+      </section>
+      <section>
+        <label for="numTeams">Antal hold:</label>
+        <input type="number" id="numTeams" name="numTeams" min="2" max="6" value="2" required>
+      </section>
+      <button type="submit">Fordel på hold</button>
+    </form>
+    <section id="teamsResult"></section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
