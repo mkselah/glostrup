@@ -31,22 +31,19 @@ function renderPlayers(players) {
 }
 
 // Group assignment helper
+// ==========================
+// CHANGES HERE for fairer team splits!
 function assignPlayersToTeams(selectedPlayers, numTeams) {
-  // Sort players by skill descending
+  // Sort by skill (descending) to balance by skill across teams
   selectedPlayers.sort((a, b) => b.skill - a.skill);
 
-  // Prepare team arrays
+  // Initialize teams
   let teams = Array.from({length: numTeams}, () => []);
 
-  // Distribute so skills are balanced (snake draft)
-  let direction = 1;
-  let teamIdx = 0;
-  for (const player of selectedPlayers) {
-    teams[teamIdx].push(player);
-    if (direction > 0 && teamIdx === numTeams-1) direction = -1;
-    else if (direction < 0 && teamIdx === 0) direction = 1;
-    teamIdx += direction;
-  }
+  // Distribute in round-robin order (avoids snake draft problem)
+  selectedPlayers.forEach((player, idx) => {
+    teams[idx % numTeams].push(player);
+  });
 
   // Shuffle each team internally for randomness
   const shuffle = arr => arr.sort(() => Math.random() - 0.5);
@@ -54,8 +51,8 @@ function assignPlayersToTeams(selectedPlayers, numTeams) {
 
   return teams;
 }
+// ==========================
 
-// Form event
 document.addEventListener('DOMContentLoaded', () => {
   loadPlayers();
 
@@ -70,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const numTeams = Math.max(2, Math.min(6, parseInt(document.getElementById('numTeams').value, 10)));
 
     if (selectedPlayers.length < numTeams) {
-      document.getElementById('teamsResult').innerHTML = "<p>For få spillere til antallet af hold.</p>";
+      document.getElementById('teamsResult').innerHTML = "<p>For fÃ¥ spillere til antallet af hold.</p>";
       return;
     }
 
