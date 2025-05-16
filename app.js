@@ -47,7 +47,7 @@ function renderPlayers(players) {
 // Fair team assignment: evenly distribute skill
 function assignPlayersToTeams(selectedPlayers, numTeams) {
   // Sort by skill (descending)
-  selectedPlayers.sort((a, b) => b.skill - a.skill);
+  selectedPlayers.sort((a, b) => a.skill - b.skill);
 
   // Initialize empty teams
   let teams = Array.from({ length: numTeams }, () => []);
